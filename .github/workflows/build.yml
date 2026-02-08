@@ -9,17 +9,74 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-24.04-arm
+  # ----------------------------------------------------------------
+  # JOB 1: ARM & ARM64 (Linux)
+  # Uses QEMU to run a virtual ARM environment
+  # ----------------------------------------------------------------
+  build-arm:
+    name: Build Linux ${{ matrix.arch }}
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        include:
+          - arch: aarch64   # ARM64
+            distro: bullseye
+          - arch: armv7     # ARM (32-bit)
+            distro: bullseye
+
     steps:
-    - name: checkout repo
-      uses: actions/checkout@v4
-    - name: build application
-      working-directory: ./Source/Server
-      run: make -f Makefile || error
-    - name: upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: openMerc_server
-        path: openMerc_server
+      - uses: actions/checkout@v4
+
+      - name: Build in ${{ matrix.arch }} container
+        uses: uraimo/run-on-arch-action@v2
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+          
+          # Install dependencies INSIDE the ARM container
+          install: |
+            apt-get update
+            apt-get install -y build-essential zlib1g-dev libcrypt-dev make gcc
+
+          # Run the build
+          run: |
+            make OUT="program_${{ matrix.arch }}"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.arch }}
+          path: program_${{ matrix.arch }}
+
+  # ----------------------------------------------------------------
+  # JOB 2: Windows 64-bit
+  # Uses MSYS2 to provide GCC and Zlib on Windows
+  # ----------------------------------------------------------------
+  build-windows:
+    name: Build Windows 64-bit
+    runs-on: windows-latest
     
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            base-devel
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-zlib
+
+      - name: Compile
+        shell: msys2 {0}
+        run: |
+          # We override LIBS to remove -lcrypt (which doesn't exist on Windows)
+          # We also point to the Windows Zlib library
+          make CC=gcc LIBS="-lm -lz" OUT="program.exe"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-windows
+          path: program.exe
