@@ -15,7 +15,8 @@ jobs:
     - name: checkout repo
       uses: actions/checkout@v4
     - name: build application
-      run: ./Source/Server/make.sh
+      working-directory: ./Source/Server
+      run: ./make.sh
     - name: upload artifact
       uses: actions/upload-artifact@v4
       with:
