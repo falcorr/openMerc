@@ -16,7 +16,7 @@ jobs:
       uses: actions/checkout@v4
     - name: build application
       working-directory: ./Source/Server
-      run: ./make.sh
+      run: make -f Makefile || error
     - name: upload artifact
       uses: actions/upload-artifact@v4
       with:
