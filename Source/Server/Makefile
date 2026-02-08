@@ -17,7 +17,7 @@ OBJS=.obj/server.o .obj/svr_disk.o .obj/svr_tick.o .obj/svr_act.o \
 SHEADER=client.h data.h funcs.h gendefs.h globals.h server.h driver.h \
 lab9.h
 
-SERVERDIR=/home/merc
+SERVERDIR=/openMerc/server
 CGIIMP=/usr/lib/cgi-imp
 CGIBIN=/usr/lib/cgi-bin
 WEB=/var/www/html/
