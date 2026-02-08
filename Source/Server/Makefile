@@ -1,8 +1,10 @@
 all: server respawn password cgi/info.cgi cgi/acct.cgi owner
 
-CC=gcc -m32
+#CC=gcc -m32
+CC=gcc
 DEBUG=-g
-CFLAGS=-Wall -Wshadow -Winline -Wno-pointer-sign -O3 $(DEBUG) -march=pentium4 -fno-strict-aliasing
+#CFLAGS=-Wall -Wshadow -Winline -Wno-pointer-sign -O3 $(DEBUG) -march=pentium4 -fno-strict-aliasing
+CFLAGS=-Wall -Wshadow -Winline -Wno-pointer-sign -O3 $(DEBUG) -fno-strict-aliasing
 LDFLAGS=-O $(DEBUG)
 ENDFLAGS=-lm -lz -lcrypt
 
